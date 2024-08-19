@@ -3,6 +3,7 @@ import os
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
+import random
 
 line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
 handler = WebhookHandler(os.getenv("LINE_CHANNEL_SECRET"))
@@ -28,10 +29,27 @@ def lambda_handler(event, context):
         'body': json.dumps('OK')
     }
 
+def get_english_data():
+    json_open = open('english_data.json', 'r')
+    json_data = json.load(json_open)
+    return json_data
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    # ユーザーからのメッセージに対して同じメッセージを返信する
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=event.message.text)
-    )
+    # generate randam int
+    index = random.randint(0, 97)
+    english_data = get_english_data()
+    reply_message = english_data[index]['sentence']
+    # when user message is '成長', bot reply to english sentence
+    if event.message.text == '成長':
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=reply_message)
+        )
+    else:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text="成長と打ち込むと英語センテンスが送られてくるよ！そのセンテンスで英作文を作ってみよう！")
+        )
+    
+    
